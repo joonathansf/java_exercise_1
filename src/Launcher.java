@@ -19,7 +19,7 @@ public class Launcher {
             String[] lines = content.split("\n");
             for (String line : lines) {
                 String[] words = line.split(" ");
-                HashMap<String, Integer> occurences = new HashMap<>();
+                LinkedHashMap<String, Integer> occurences = new LinkedHashMap<>();
                 boolean isLineEmpty = false;
                 for (String word : words) {
                     int value = 0;
@@ -27,9 +27,9 @@ public class Launcher {
                         isLineEmpty = true;
                         break;
                     }
-                    if (occurences.containsKey(word))
-                        value = occurences.get(word);
-                    occurences.put(word, value + 1);
+                    if (occurences.containsKey(word.toLowerCase()))
+                        value = occurences.get(word.toLowerCase());
+                    occurences.put(word.toLowerCase(), value + 1);
                 }
                 int limit = 0;
                 while (limit < 3 || occurences.size() < 0) {
