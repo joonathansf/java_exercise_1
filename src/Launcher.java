@@ -1,82 +1,26 @@
-import java.nio.file.Files;
 import java.util.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class Launcher {
 
-    static int fibonacci(int n) {
-        if (n == 0 || n == 1) {
-            return n;
-        }
-        return fibonacci(n - 1) + fibonacci(n - 2);
-    }
-
-    static void readFile(String file) {
-        try {
-            Path filePath = Paths.get(file);
-            String content = Files.readString(filePath);
-            String[] lines = content.split("\n");
-            for (String line : lines) {
-                String[] words = line.split(" ");
-                LinkedHashMap<String, Integer> occurences = new LinkedHashMap<>();
-                boolean isLineEmpty = false;
-                for (String word : words) {
-                    int value = 0;
-                    if (word.isBlank()) {
-                        isLineEmpty = true;
-                        break;
-                    }
-                    if (occurences.containsKey(word.toLowerCase()))
-                        value = occurences.get(word.toLowerCase());
-                    occurences.put(word.toLowerCase(), value + 1);
-                }
-                int limit = 0;
-                while (limit < 3 || occurences.size() < 0) {
-                    String indice = "";
-                    int max = -1;
-                    for (Map.Entry<String, Integer> entry : occurences.entrySet()) {
-                        String key = entry.getKey();
-                        int value = entry.getValue();
-                        if (value > max) {
-                            indice = key;
-                            max = value;
-                        }
-                    }
-                    if (!isLineEmpty) System.out.print(indice + " ");
-                    occurences.remove(indice);
-                    limit += 1;
-                }
-                if (!isLineEmpty) System.out.print("\n");
-            }
-        } catch(Exception e) {
-            System.out.println("Unreadable file: " + e.getClass() + " " +  e.getMessage());
-        }
-    }
-
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        while (true) {
+        List<Command> actions = new ArrayList<Command>();
+        actions.add(new Freq());
+        actions.add(new Fibo());
+        actions.add(new Quit());
+        boolean finish = false;
+        while (!finish) {
+            boolean actionFound = false;
             System.out.println("Input :");
             String input = sc.nextLine();
-            switch (input) {
-                case "quit":
-                    sc.close();
-                    return;
-                case "fibo":
-                    System.out.println("Nombre :");
-                    int val = sc.nextInt();
-                    sc.nextLine();
-                    System.out.println("Résultat : " + fibonacci(val));
-                    break;
-                case "freq":
-                    System.out.println("Fichier :");
-                    String file = sc.nextLine();
-                    readFile(file);
-                    break;
-                default:
-                    System.out.println("Unknown command");
+            for (int i = 0; i < actions.size(); i++) {
+                if (actions.get(i).name().equals(input)) {
+                    actionFound = true;
+                    finish = actions.get(i).run(sc);
+                }
             }
+            if (!actionFound) System.out.println("Unknown command");
         }
+        sc.close();
     }
 }
