@@ -7,6 +7,7 @@ public class Launcher {
         List<Command> actions = new ArrayList<Command>();
         actions.add(new Freq());
         actions.add(new Fibo());
+        actions.add(new Predict());
         actions.add(new Quit());
         boolean finish = false;
         while (!finish) {
