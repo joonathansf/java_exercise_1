@@ -1,34 +1,47 @@
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class Predict implements Command {
 
-    static void readFile(String file, String mot) {
+    static void readFile(String file, String word) {
         try {
             Path filePath = Paths.get(file);
             String content = Files.readString(filePath);
-            String[] lines = content.split(" ");
-            boolean founded = false;
-            for (String word : lines)
-            {
-                if (word.equals(mot)) {
-                    founded = true;
+            String[] words = content.split(" ");
+            String result = word;
+            for (int i = 0; i < 19; i++) {
+                ArrayList<String> occurences = new ArrayList<String>();
+                for (int j = 0; j < words.length; j++) {
+                    if (words[j].equals(word)) {
+                        occurences.add(words[j + 1]);
+                    }
                 }
-            }
-            if (!founded) {
-                System.out.println("Mot non trouvé");
-            }
-            else {
-                for (String word : lines)
-                {
-                    System.out.print(word + " ");
+                Collections.sort(occurences);
+                int max = 1;
+                String current = occurences.get(occurences.size() - 1) ;
+                int count = 1;
+                for (int k = 1; k < occurences.size(); k++){
+                    if (occurences.get(k).equals(occurences.get(k - 1))){
+                        count += 1;
+                    }
+                    else{
+                        if (count > max) {
+                            current = occurences.get(k - 1);
+                            max = count;
+                        }
+                        count = 1;
+                    }
                 }
-                System.out.println("");
+                if (count > max) {
+                    current = occurences.get(occurences.size() - 1);
+                    max = count;
+                }
+                result += " " + current;
+                word = current;
             }
+            System.out.println(result);
         } catch(Exception e) {
             System.out.println("Unreadable file: " + e.getClass() + " " +  e.getMessage());
         }
@@ -44,8 +57,8 @@ public class Predict implements Command {
         System.out.println("Fichier :");
         String file = sc.nextLine();
         System.out.println("Mot :");
-        String mot = sc.nextLine();
-        readFile(file, mot);
+        String word = sc.nextLine();
+        readFile(file, word.toLowerCase());
         return true;
     }
 }
