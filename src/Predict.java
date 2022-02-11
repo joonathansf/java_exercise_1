@@ -1,21 +1,32 @@
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class Predict implements Command {
+public class Predict implements Command{
 
-    static void readFile(String file, String word) {
+    public String name() {
+        return "predict";
+    }
+
+    @Override
+    public boolean run(Scanner sc) {
+        System.out.println("Enter file path :");
+        String path = sc.nextLine();
+        Path filePath = Paths.get(path);
         try {
-            Path filePath = Paths.get(file);
             String content = Files.readString(filePath);
             String[] word_list = content.split(" ");
-            String phrase = word;
+            System.out.println("Enter a word :");
+            String mot = sc.nextLine();
+            mot = mot.toLowerCase();
+            String phrase = mot;
             for (int i = 0; i < 19; i++) {
                 ArrayList<String> mot_apres = new ArrayList<String>();
                 //on met tout les mots 'apres' le mot acutel dans une liste
                 for (int j = 0; j < word_list.length; j++) {
-                    if (word_list[j].equals(word)) {
+                    if (word_list[j].equals(mot)) {
                         //System.out.println("j'ajoute : " + word_list[j + 1]);
                         mot_apres.add(word_list[j + 1]);
                     }
@@ -42,26 +53,15 @@ public class Predict implements Command {
                 }
                 //System.out.println("j'ai hoisis le mot : " + mot_max);
                 phrase += " " + mot_max;
-                word = mot_max;
+                mot= mot_max;
             }
             System.out.println(phrase);
-        } catch(Exception e) {
-            System.out.println("Unreadable file: " + e.getClass() + " " +  e.getMessage());
         }
-    }
-
-    @Override
-    public String name() {
-        return "predict";
-    }
-
-    @Override
-    public boolean run(Scanner sc) {
-        System.out.println("Fichier :");
-        String file = sc.nextLine();
-        System.out.println("Mot :");
-        String word = sc.nextLine();
-        readFile(file, word.toLowerCase());
+        catch(IOException e) {
+            System.out.println("Unreadable file: " + e.getClass() + " " + e.getMessage());
+            return false;
+        }
         return true;
     }
+
 }
