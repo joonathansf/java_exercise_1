@@ -9,39 +9,42 @@ public class Predict implements Command {
         try {
             Path filePath = Paths.get(file);
             String content = Files.readString(filePath);
-            String[] words = content.split(" ");
-            String result = word;
+            String[] word_list = content.split(" ");
+            String phrase = word;
             for (int i = 0; i < 19; i++) {
-                ArrayList<String> occurences = new ArrayList<String>();
-                for (int j = 0; j < words.length; j++) {
-                    if (words[j].equals(word)) {
-                        occurences.add(words[j + 1]);
+                ArrayList<String> mot_apres = new ArrayList<String>();
+                //on met tout les mots 'apres' le mot acutel dans une liste
+                for (int j = 0; j < word_list.length; j++) {
+                    if (word_list[j].equals(word)) {
+                        //System.out.println("j'ajoute : " + word_list[j + 1]);
+                        mot_apres.add(word_list[j + 1]);
                     }
                 }
-                Collections.sort(occurences);
-                int max = 1;
-                String current = occurences.get(occurences.size() - 1) ;
-                int count = 1;
-                for (int k = 1; k < occurences.size(); k++){
-                    if (occurences.get(k).equals(occurences.get(k - 1))){
-                        count += 1;
+                Collections.sort(mot_apres);
+                int maxi = 1;
+                String mot_max = mot_apres.get(mot_apres.size() - 1) ;
+                int counte = 1;
+                for (int w = 1; w < mot_apres.size(); w++){
+                    if (mot_apres.get(w).equals(mot_apres.get(w - 1))){
+                        counte += 1;
                     }
                     else{
-                        if (count > max) {
-                            current = occurences.get(k - 1);
-                            max = count;
+                        if (counte > maxi) {
+                            mot_max = mot_apres.get(w - 1);
+                            maxi = counte;
                         }
-                        count = 1;
+                        counte = 1;
                     }
                 }
-                if (count > max) {
-                    current = occurences.get(occurences.size() - 1);
-                    max = count;
+                if (counte > maxi) {
+                    mot_max = mot_apres.get(mot_apres.size() - 1);
+                    maxi = counte;
                 }
-                result += " " + current;
-                word = current;
+                //System.out.println("j'ai hoisis le mot : " + mot_max);
+                phrase += " " + mot_max;
+                word = mot_max;
             }
-            System.out.println(result.toLowerCase());
+            System.out.println(phrase);
         } catch(Exception e) {
             System.out.println("Unreadable file: " + e.getClass() + " " +  e.getMessage());
         }
