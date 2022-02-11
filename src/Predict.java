@@ -41,7 +41,7 @@ public class Predict implements Command {
                 result += " " + current;
                 word = current;
             }
-            System.out.println(result);
+            System.out.println(result.toLowerCase());
         } catch(Exception e) {
             System.out.println("Unreadable file: " + e.getClass() + " " +  e.getMessage());
         }
