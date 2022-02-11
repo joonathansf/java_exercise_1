@@ -1,67 +1,68 @@
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Scanner;
 
-public class Predict implements Command{
-
+public class Predict implements Command {
+    @Override
     public String name() {
         return "predict";
     }
-
     @Override
-    public boolean run(Scanner sc) {
-        System.out.println("Enter file path :");
-        String path = sc.nextLine();
-        Path filePath = Paths.get(path);
+    public boolean run(Scanner scanner) {
+        System.out.println("Please enter the path of the file");
+        String strFilePath = "";
         try {
-            String content = Files.readString(filePath);
-            String[] word_list = content.split(" ");
-            System.out.println("Enter a word :");
-            String mot = sc.nextLine();
-            mot = mot.toLowerCase();
-            String phrase = mot;
-            for (int i = 0; i < 19; i++) {
-                ArrayList<String> mot_apres = new ArrayList<String>();
-                //on met tout les mots 'apres' le mot acutel dans une liste
-                for (int j = 0; j < word_list.length; j++) {
-                    if (word_list[j].equals(mot)) {
-                        //System.out.println("j'ajoute : " + word_list[j + 1]);
-                        mot_apres.add(word_list[j + 1]);
-                    }
+            strFilePath = scanner.nextLine();
+            String a = Files.readString(Paths.get(strFilePath));
+            String[] words = a.replaceAll("[^a-zA-Z0-9 ]", "").toLowerCase().split(" ");
+            Map<String, Map<String, Integer>> firstWordhashMap = new HashMap<>();
+
+            for (int i = 0; i < words.length - 1; i++) {
+                String firstWord = words[i];
+                String followingWord = words[i+1];
+                Map<String, Integer> followingWordHashMap = firstWordhashMap.get(firstWord);
+                if(followingWordHashMap == null) {
+                    followingWordHashMap = new HashMap<>();
+                    firstWordhashMap.put(firstWord, followingWordHashMap);
+                    followingWordHashMap.put(followingWord, 1);
+                    continue;
                 }
-                Collections.sort(mot_apres);
-                int maxi = 1;
-                String mot_max = mot_apres.get(mot_apres.size() - 1) ;
-                int counte = 1;
-                for (int w = 1; w < mot_apres.size(); w++){
-                    if (mot_apres.get(w).equals(mot_apres.get(w - 1))){
-                        counte += 1;
-                    }
-                    else{
-                        if (counte > maxi) {
-                            mot_max = mot_apres.get(w - 1);
-                            maxi = counte;
-                        }
-                        counte = 1;
-                    }
-                }
-                if (counte > maxi) {
-                    mot_max = mot_apres.get(mot_apres.size() - 1);
-                    maxi = counte;
-                }
-                //System.out.println("j'ai hoisis le mot : " + mot_max);
-                phrase += " " + mot_max;
-                mot= mot_max;
+                Integer j = followingWordHashMap.get(followingWord);
+                if (j == null)
+                    followingWordHashMap.put(followingWord, 1);
+                else
+                    followingWordHashMap.replace(followingWord, j+1);
             }
-            System.out.println(phrase);
-        }
-        catch(IOException e) {
-            System.out.println("Unreadable file: " + e.getClass() + " " + e.getMessage());
-            return false;
+            System.out.println("Enter a word : ");
+            strFilePath = scanner.nextLine();
+            strFilePath = strFilePath.toLowerCase();
+            if (!firstWordhashMap.containsKey(strFilePath)) {
+                System.out.println("This word isn't in the text, exiting the command !");
+                return false;
+            }
+            String followingWord = strFilePath;
+            StringBuilder stringBuilder = new StringBuilder();
+            int length = 1;
+            while(firstWordhashMap.containsKey(followingWord) && length++ < 20) {
+                Map<String, Integer> val = firstWordhashMap.get(followingWord);
+                Integer value = 0;
+                stringBuilder.append(" " + followingWord);
+                for(Entry<String, Integer> e : val.entrySet()) {
+                    if(e.getValue() > value) {
+                        followingWord = e.getKey();
+                        value = e.getValue();
+                    }
+                }
+            }
+            stringBuilder.append(' ' + followingWord);
+            System.out.println(stringBuilder.toString());
+        } catch (IOException e) {
+            System.out.println("Unreadable file : " + e.getClass() + " " + e.getMessage());
         }
         return true;
     }
-
 }
