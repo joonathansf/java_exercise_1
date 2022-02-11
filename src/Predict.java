@@ -1,68 +1,64 @@
-import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Scanner;
+import java.util.*;
 
 public class Predict implements Command {
+
+    static void readFile(String file, String word) {
+        try {
+            Path filePath = Paths.get(file);
+            String content = Files.readString(filePath);
+            String[] words = content.split(" ");
+            String result = word;
+            for (int i = 0; i < 19; i++) {
+                ArrayList<String> occurences = new ArrayList<String>();
+                for (int j = 0; j < words.length; j++) {
+                    if (words[j].equals(word)) {
+                        occurences.add(words[j + 1]);
+                    }
+                }
+                Collections.sort(occurences);
+                int max = 1;
+                String current = occurences.get(occurences.size() - 1) ;
+                int count = 1;
+                for (int k = 1; k < occurences.size(); k++){
+                    if (occurences.get(k).equals(occurences.get(k - 1))){
+                        count += 1;
+                    }
+                    else{
+                        if (count > max) {
+                            current = occurences.get(k - 1);
+                            max = count;
+                        }
+                        count = 1;
+                    }
+                }
+                if (count > max) {
+                    current = occurences.get(occurences.size() - 1);
+                    max = count;
+                }
+                result += " " + current;
+                word = current;
+            }
+            System.out.println(result.toLowerCase());
+        } catch(Exception e) {
+            System.out.println("Unreadable file: " + e.getClass() + " " +  e.getMessage());
+        }
+    }
+
     @Override
     public String name() {
         return "predict";
     }
-    @Override
-    public boolean run(Scanner scanner) {
-        System.out.println("Please enter the path of the file");
-        String strFilePath = "";
-        try {
-            strFilePath = scanner.nextLine();
-            String a = Files.readString(Paths.get(strFilePath));
-            String[] words = a.replaceAll("[^a-zA-Z0-9 ]", "").toLowerCase().split(" ");
-            Map<String, Map<String, Integer>> firstWordhashMap = new HashMap<>();
 
-            for (int i = 0; i < words.length - 1; i++) {
-                String firstWord = words[i];
-                String followingWord = words[i+1];
-                Map<String, Integer> followingWordHashMap = firstWordhashMap.get(firstWord);
-                if(followingWordHashMap == null) {
-                    followingWordHashMap = new HashMap<>();
-                    firstWordhashMap.put(firstWord, followingWordHashMap);
-                    followingWordHashMap.put(followingWord, 1);
-                    continue;
-                }
-                Integer j = followingWordHashMap.get(followingWord);
-                if (j == null)
-                    followingWordHashMap.put(followingWord, 1);
-                else
-                    followingWordHashMap.replace(followingWord, j+1);
-            }
-            System.out.println("Enter a word : ");
-            strFilePath = scanner.nextLine();
-            strFilePath = strFilePath.toLowerCase();
-            if (!firstWordhashMap.containsKey(strFilePath)) {
-                System.out.println("This word isn't in the text, exiting the command !");
-                return false;
-            }
-            String followingWord = strFilePath;
-            StringBuilder stringBuilder = new StringBuilder();
-            int length = 1;
-            while(firstWordhashMap.containsKey(followingWord) && length++ < 20) {
-                Map<String, Integer> val = firstWordhashMap.get(followingWord);
-                Integer value = 0;
-                stringBuilder.append(" " + followingWord);
-                for(Entry<String, Integer> e : val.entrySet()) {
-                    if(e.getValue() > value) {
-                        followingWord = e.getKey();
-                        value = e.getValue();
-                    }
-                }
-            }
-            stringBuilder.append(' ' + followingWord);
-            System.out.println(stringBuilder.toString());
-        } catch (IOException e) {
-            System.out.println("Unreadable file : " + e.getClass() + " " + e.getMessage());
-        }
+    @Override
+    public boolean run(Scanner sc) {
+        System.out.println("Fichier :");
+        String file = sc.nextLine();
+        System.out.println("Mot :");
+        String word = sc.nextLine();
+        readFile(file, word.toLowerCase());
         return true;
     }
 }
